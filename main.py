@@ -1,34 +1,52 @@
 from bluetoothreciver.airpods_manager import AirPodsManager
-from observer.observer import DashMenuObserver, NotificationObserver, GuiObserver
+from observer.observer import DashMenuListener, NotificationListener, GuiListener
+from state.state import MediumBatteryState, LowBatteryState, HighBatteryState
 from time import sleep
-from plyer import notification
+import argparse
+
+MAPPER = {"medium": MediumBatteryState, "low": LowBatteryState, "high": HighBatteryState}
 
 if __name__ == "__main__":
-    # from tkinter import *
+    parser = argparse.ArgumentParser(description="Airpods battery notifier.")
 
-    # root = Tk()  # create a root widget
-    # root.wm_attributes('-type', 'splash')
-    # # root.title("Tk Example")
-    # root.configure(background="yellow")
-    # root.minsize(200, 200)  # width, height
-    # root.maxsize(500, 500)
-    # root.geometry("300x300+50+50")  # width x height + x + y
-    # root.mainloop()
-    dash_menu_observer = DashMenuObserver()
-    notification_observer = NotificationObserver()
-    gui_observer = GuiObserver()
+    parser.add_argument("time", type=int, help="Time in seconds for starting the programme.")
 
-    manager = AirPodsManager([dash_menu_observer, notification_observer, gui_observer])
+    parser.add_argument(
+        "gui_policy",
+        type=str,
+        default="low",
+        choices=["low", "medium", "high"],
+        help="".join(
+            [
+                "Available policies are: \n",
+                "low - Notification more often from 20%%, \n",
+                "medium - Notification starting from 50%%,\n",
+                "high - Rare notification starting from 90%% with 30 min timeouts.\n",
+            ]
+        ),
+    )
+
+    parser.add_argument(
+        "notification_policy",
+        default="medium",
+        type=str,
+        choices=["low", "medium", "high"],
+        help="".join(
+            [
+                "Available policies are: \n\n",
+                "low - Notification more often from 20%%, \n",
+                "medium - Notification starting from 50%%,\n",
+                "high - Rare notification starting from 90%% with 30 min timeouts.\n",
+            ]
+        ),
+    )
+    args = parser.parse_args()
+
+    dash_menu_Listener = DashMenuListener()
+    notification_Listener = NotificationListener(MAPPER[args.notification_policy])
+    gui_Listener = GuiListener(MAPPER[args.gui_policy])
+
+    manager = AirPodsManager([dash_menu_Listener, notification_Listener, gui_Listener])
     while True:
         data = manager.get_info()
-        if data["status"] != 0:
-            notification.notify(
-                title=f"{data['model']}",
-                message=f"Left: {data['charge']['left']}%\n"
-                + f"Right: {data['charge']['right']}%\n"
-                + f"Case: {data['charge']['case']}%",
-                app_icon="headphones-3-64.png",
-                timeout=4,
-                toast=False,
-            )
-        sleep(15)
+        sleep(args.time)

@@ -3,6 +3,9 @@ from bleak.backends.device import BLEDevice
 from binascii import hexlify
 from time import time_ns
 from typing import Any
+from abc import ABC, abstractmethod, ABCMeta
+import sys
+import asyncio
 
 
 class SingletonMeta(type):
@@ -14,7 +17,17 @@ class SingletonMeta(type):
         return cls._instances[cls]
 
 
-class BluetoothDataReceiver(metaclass=SingletonMeta):
+class SingletonABCMeta(SingletonMeta, ABCMeta):
+    pass
+
+
+class BluetoothDataReceiver(ABC, metaclass=SingletonABCMeta):
+    @abstractmethod
+    async def get_airpods_data(self) -> bytes:
+        pass
+
+
+class LinuxBluetoothDataReceiver(BluetoothDataReceiver):
     UPDATE_DURATION: int = 1
     MIN_RSSI: int = -60
     AIRPODS_MANUFACTURER: int = 76
@@ -61,3 +74,31 @@ class BluetoothDataReceiver(metaclass=SingletonMeta):
                 if data_length == self.AIRPODS_DATA_LENGTH:
                     return data_hex
         return None
+
+
+class WindowsBluetoothDataReceiver(BluetoothDataReceiver):
+    async def get_airpods_data(self) -> bytes:
+        await asyncio.sleep(0)  # This makes the method asynchronous
+        return None
+
+
+class MacOSBluetoothDataReceiver(BluetoothDataReceiver):
+    def __init__(self) -> None:
+        super().__init__()
+        print("You have perfect support for AirPods on MacOS :)")
+        sys.exit(0)
+
+    async def get_airpods_data(self) -> bytes:
+        await asyncio.sleep(0)  # This makes the method asynchronous
+        return None
+
+
+class BluetoothDataReceiverFactory:
+    @staticmethod
+    def get_bluetooth_data_receiver() -> BluetoothDataReceiver:
+        mapping = {
+            "linux": LinuxBluetoothDataReceiver,
+            "win32": WindowsBluetoothDataReceiver,
+            "darwin": MacOSBluetoothDataReceiver,
+        }
+        return mapping[sys.platform]()

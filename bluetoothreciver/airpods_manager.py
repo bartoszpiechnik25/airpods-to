@@ -1,14 +1,16 @@
 from bluetoothreciver.parser import HexParser
-from bluetoothreciver.bluetoothreciver import BluetoothDataReceiver
+from bluetoothreciver.bluetoothreciver import BluetoothDataReceiverFactory, BluetoothDataReceiver
 from asyncio import new_event_loop, set_event_loop, get_event_loop
 from typing import Dict, Any, List
-from observer.observer import Observer
+from observer.observer import EventManager, Listener
 
 
 class AirPodsManager:
-    def __init__(self, observers: List[Observer] = None):
-        self._bluetooth_reciver = BluetoothDataReceiver()
-        self._observers: List[Observer] = observers or []
+    def __init__(self, listeners: List[Listener] = None):
+        self._bluetooth_reciver: BluetoothDataReceiver = (
+            BluetoothDataReceiverFactory.get_bluetooth_data_receiver()
+        )
+        self._listeners: EventManager = EventManager(listeners)
 
     def get_info(self) -> Dict[str, Any]:
         new_loop = new_event_loop()
@@ -27,5 +29,5 @@ class AirPodsManager:
         Args:
             data (Dict[str, Any]): Data to send to observers.
         """
-        for observer in self._observers:
-            observer.update(data)
+        if data["status"] != 0:
+            self._listeners.notify(data)
