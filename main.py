@@ -1,5 +1,5 @@
 from bluetoothreciver.airpods_manager import AirPodsManager
-from observer.observer import DashMenuListener, NotificationListener, GuiListener
+from observer.observer import TerminalListener, NotificationListener, GuiListener
 from state.state import MediumBatteryState, LowBatteryState, HighBatteryState
 from time import sleep
 import argparse
@@ -42,7 +42,7 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    dash_menu_Listener = DashMenuListener()
+    dash_menu_Listener = TerminalListener()
     notification_Listener = NotificationListener(MAPPER[args.notification_policy])
     gui_Listener = GuiListener(MAPPER[args.gui_policy])
 

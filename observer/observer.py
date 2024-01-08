@@ -29,9 +29,14 @@ class NotificationListener(Listener):
         self._battery_state.handle_notification(data)
 
 
-class DashMenuListener(Listener):
+class TerminalListener(Listener):
+    def __init__(self, battery_state: LowBatteryState = MediumBatteryState) -> None:
+        super().__init__()
+        self._battery_state: HeadphonesBatteryState = battery_state()
+
     def update(self, data: Dict) -> None:
-        print(f"this is dash menu Listener {data}")
+        # Update the HeadphonesWindow with the new data
+        self._battery_state.handle_notification(data)
 
 
 class EventManager:

@@ -19,7 +19,7 @@ class HeadphonesBatteryState(ABC):
         pass
 
     @abstractmethod
-    def handle_dash_menu(self, listener) -> None:
+    def handle_terminal(self, listener) -> None:
         pass
 
 
@@ -85,8 +85,8 @@ class LowBatteryState(HeadphonesBatteryState):
                         toast=False,
                     )
 
-    def handle_dash_menu(self, listener) -> None:
-        pass
+    def handle_terminal(self, data) -> None:
+        print(data)
 
     def __str__(self) -> str:
         return (
@@ -158,8 +158,8 @@ class MediumBatteryState(HeadphonesBatteryState):
                         toast=False,
                     )
 
-    def handle_dash_menu(self, listener) -> None:
-        pass
+    def handle_terminal(self, data) -> None:
+        print(data)
 
     def __str__(self) -> str:
         return (
@@ -232,8 +232,8 @@ class HighBatteryState(HeadphonesBatteryState):
                         toast=False,
                     )
 
-    def handle_dash_menu(self, listener) -> None:
-        pass
+    def handle_terminal(self, data) -> None:
+        print(data)
 
     def __str__(self) -> str:
         return (
